@@ -3,37 +3,31 @@ import rospy
 import time
 from subprocess import call
 from std_msgs.msg import String
+import threading
 
-flag0 = 0
+my_mutex = threading.Lock()
+
 def callback1(data):
-    global flag0 
 
     rospy.loginfo(rospy.get_caller_id() + "callback1: I heard %s", data.data)
-    
-    while (flag0 == 1):
-        time.sleep(0.1)
-    
+
+    my_mutex.acquire()    
     print "callback1: critical section entering ..."
-    flag0 = 1
     for x in range(0, 30):
         call(["sleep", "1"])
     print "callback1: critical section completed ..."
-    flag0 = 0
+    my_mutex.release() 
 
 def callback2(data):
-    global flag0
 
     rospy.loginfo(rospy.get_caller_id() + "callback2: I heard %s", data.data)
 
-    while (flag0 == 1):
-        time.sleep(0.1)
-
+    my_mutex.acquire()
     print "callback2: critical section entering ..."
-    flag0 = 1
     for x in range(0, 30):
         call(["sleep", "1"])
     print "callback2: critical section completed ..."
-    flag0 = 0
+    my_mutex.release()
 
 def listener():
 
